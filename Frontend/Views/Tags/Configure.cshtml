@@ -1,0 +1,107 @@
+﻿@model SCADA.Frontend.ViewModels.TagViewModel
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Create Tag" : "Edit Tag";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <h2>@ViewData["Title"]</h2>
+
+    <form asp-action="Configure" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="PlcId" class="form-label">PLC</label>
+                <select asp-for="PlcId" asp-items="@(new SelectList(ViewBag.PLCs, "Id", "Name"))"
+                        class="form-select">
+                    <option value="">-- Select PLC --</option>
+                </select>
+                <span asp-validation-for="PlcId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label asp-for="Address" class="form-label"></label>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="DataType" class="form-label">Data Type</label>
+                <select asp-for="DataType" class="form-select">
+                    <option value="Boolean">Boolean</option>
+                    <option value="Int32">Integer</option>
+                    <option value="Float">Float</option>
+                    <option value="String">String</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">Historical Logging</div>
+            <div class="card-body">
+                <div class="form-check form-switch mb-3">
+                    <input asp-for="LogHistory" class="form-check-input" type="checkbox">
+                    <label asp-for="LogHistory" class="form-check-label"></label>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label asp-for="HistoryInterval" class="form-label">Interval (ms)</label>
+                        <input asp-for="HistoryInterval" class="form-control" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">Alarm Configuration</div>
+            <div class="card-body">
+                <div class="form-check form-switch mb-3">
+                    <input asp-for="HasAlarm" class="form-check-input" type="checkbox">
+                    <label asp-for="HasAlarm" class="form-check-label"></label>
+                </div>
+                <div id="alarmConfig" style="@(Model.HasAlarm ? "" : "display:none")">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label asp-for="AlarmCondition" class="form-label">Condition</label>
+                            <select asp-for="AlarmCondition" class="form-select">
+                                <option value=">">Greater Than</option>
+                                <option value="<">Less Than</option>
+                                <option value="=">Equal To</option>
+                                <option value="!=">Not Equal</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="AlarmThreshold" class="form-label">Threshold</label>
+                            <input asp-for="AlarmThreshold" class="form-control" />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="AlarmMessage" class="form-label">Message</label>
+                            <input asp-for="AlarmMessage" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a asp-action="Index" class="btn btn-secondary me-md-2">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("HasAlarm").addEventListener("change", function() {
+            document.getElementById("alarmConfig").style.display =
+                this.checked ? "block" : "none";
+        });
+    </script>
+}

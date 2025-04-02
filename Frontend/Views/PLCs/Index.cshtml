@@ -1,0 +1,34 @@
+﻿@model List<SCADA.Frontend.ViewModels.PLCViewModel>
+
+<div class="plc-list">
+    @foreach (var plc in Model)
+    {
+        <div class="plc-card" data-plc-id="@plc.Id">
+            <h3>@plc.Name</h3>
+            <p>@plc.IPAddress:@plc.Port</p>
+            <div class="plc-status @(plc.IsActive ? "online" : "offline")">
+                @(plc.IsActive ? "Online" : "Offline")
+            </div>
+            <a asp-action="Configure" asp-route-id="@plc.Id" class="btn btn-primary">Configure</a>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        .plc-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .online {
+            color: green;
+        }
+
+        .offline {
+            color: red;
+        }
+    </style>
+}

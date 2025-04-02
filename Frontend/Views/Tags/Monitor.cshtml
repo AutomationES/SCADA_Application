@@ -1,0 +1,84 @@
+﻿@model SCADA.Frontend.ViewModels.TagViewModel
+@{
+    ViewData["Title"] = $"Monitoring - {Model.Name}";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h3>@Model.Name</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="value-display">
+                        <h4>Current Value:</h4>
+                        <div class="value-box" data-tag-id="@Model.Id">
+                            <span id="tagValue">@Model.LastValue</span>
+                            <span class="badge bg-secondary">@Model.DataType</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="tag-info">
+                        <p><strong>PLC:</strong> @Model.PlcId</p>
+                        <p><strong>Address:</strong> @Model.Address</p>
+                        <p>
+                            <strong>Alarm:</strong>
+                            @if (Model.HasAlarm)
+                            {
+                                <span class="badge bg-danger">@Model.AlarmCondition @Model.AlarmThreshold</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Disabled</span>
+                            }
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a asp-action="Index" class="btn btn-secondary mt-3">Back to List</a>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("@ViewBag.SignalRUrl")
+                .build();
+
+            connection.on("TagValueUpdated", function (tagId, value) {
+                if (tagId === @Model.Id) {
+                    document.getElementById("tagValue").textContent = value;
+                    // Add visual feedback
+                    const box = document.querySelector(".value-box");
+                    box.classList.add("value-updated");
+                    setTimeout(() => box.classList.remove("value-updated"), 500);
+                }
+            });
+
+            connection.start()
+                .then(() => connection.invoke("SubscribeToTag", @Model.Id))
+                .catch(err => console.error(err));
+        });
+    </script>
+}
+
+<style>
+    .value-box {
+        padding: 20px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        font-size: 24px;
+        margin: 10px 0;
+        transition: all 0.3s ease;
+    }
+
+    .value-updated {
+        border-color: #0d6efd;
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+</style>

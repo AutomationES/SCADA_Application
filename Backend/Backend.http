@@ -1,0 +1,16 @@
+@Backend_HostAddress = https://localhost:7180
+
+### Get all PLCs
+GET {{Backend_HostAddress}}/api/PLCs
+Accept: application/json
+
+### Create new PLC
+POST {{Backend_HostAddress}}/api/PLCs
+Content-Type: application/json
+
+{
+  "name": "Main PLC",
+  "ipAddress": "192.168.1.10",
+  "port": 502,
+  "protocolType": "ModbusTCP"
+}

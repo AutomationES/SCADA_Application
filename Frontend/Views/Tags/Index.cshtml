@@ -1,0 +1,40 @@
+﻿@model List<SCADA.Frontend.ViewModels.TagViewModel>
+    @{
+    ViewData["Title"] = "Tags";
+    Layout = "_Layout";
+    }
+
+    <div class="container mt-4">
+        <h2>Tag List</h2>
+
+        <div class="mb-3">
+            <a asp-action="Configure" class="btn btn-primary">Create New Tag</a>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Type</th>
+                    <th>PLC</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var tag in Model)
+                {
+                <tr>
+                    <td>@tag.Name</td>
+                    <td>@tag.Address</td>
+                    <td>@tag.DataType</td>
+                    <td>PLC #@tag.PlcId</td>
+                    <td>
+                        <a asp-action="Monitor" asp-route-id="@tag.Id" class="btn btn-sm btn-info">Monitor</a>
+                        <a asp-action="Configure" asp-route-id="@tag.Id" class="btn btn-sm btn-warning">Edit</a>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>

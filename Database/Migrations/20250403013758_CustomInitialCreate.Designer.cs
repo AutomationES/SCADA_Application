@@ -12,15 +12,15 @@ using SCADA.Database.Data;
 namespace SCADA.Database.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250330165417_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250403013758_CustomInitialCreate")]
+    partial class CustomInitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.3")
+                .HasAnnotation("ProductVersion", "8.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -358,13 +358,11 @@ namespace SCADA.Database.Migrations
 
             modelBuilder.Entity("SCADA.Common.Models.Tag", b =>
                 {
-                    b.HasOne("SCADA.Common.Models.PLC", "PLC")
+                    b.HasOne("SCADA.Common.Models.PLC", null)
                         .WithMany("Tags")
                         .HasForeignKey("PlcId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("PLC");
                 });
 
             modelBuilder.Entity("SCADA.Common.Models.PLC", b =>

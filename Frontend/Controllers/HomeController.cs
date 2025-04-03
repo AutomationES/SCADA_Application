@@ -1,20 +1,84 @@
+//using Microsoft.AspNetCore.Mvc;
+//using SCADA.Frontend.ViewModels;
+//using System.Net;
+//using System.Net.Http; // For HttpClient
+//using System.Net.Http.Headers; // For MediaTypeWithQualityHeaderValue
+//using System.Net.Http.Json; // For ReadFromJsonAsync
+
+//namespace SCADA.Frontend.Controllers;
+
+//public class HomeController : Controller
+//{
+//    private readonly IHttpClientFactory _httpClientFactory;
+
+//    // Inject IHttpClientFactory through constructor
+//    public HomeController(IHttpClientFactory httpClientFactory)
+//    {
+//        _httpClientFactory = httpClientFactory;
+//    }
+
+//    public async Task<IActionResult> Index()
+//    {
+//        try
+//        {
+//            var client = _httpClientFactory.CreateClient("API");
+//            client.Timeout = TimeSpan.FromSeconds(30); // Set timeout
+
+//            var response = await client.GetAsync("dashboard/stats");
+
+//            response.EnsureSuccessStatusCode(); // Throws if not 200-299
+
+//            var model = await response.Content.ReadFromJsonAsync<DashboardViewModel>();
+//            return View(model);
+//        }
+//        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+//        {
+//            return NotFound();
+//        }
+//        catch (HttpRequestException ex)
+//        {
+//            // Log error (e.g., using ILogger)
+//            return StatusCode(StatusCodes.Status503ServiceUnavailable);
+//        }
+//        catch (TaskCanceledException ex) when (!ex.CancellationToken.IsCancellationRequested)
+//        {
+//            // Handle timeout
+//            return StatusCode(StatusCodes.Status504GatewayTimeout);
+//        }
+//    }
+//}
+
+
+//using Microsoft.AspNetCore.Mvc;
+
+//public class HomeController : Controller
+//{
+//    [HttpGet("/Home/Index")]
+//    [HttpGet("/")]
+//    public string Index()
+//    {
+//        return "RAW RESPONSE - Controller is working";
+//    }
+//}
+
+
 using Microsoft.AspNetCore.Mvc;
+using SCADA.Frontend.Models; // Changed from ViewModels to Models
 using SCADA.Frontend.ViewModels;
 using System.Net;
-using System.Net.Http; // For HttpClient
-using System.Net.Http.Headers; // For MediaTypeWithQualityHeaderValue
-using System.Net.Http.Json; // For ReadFromJsonAsync
+using System.Net.Http.Headers;
 
 namespace SCADA.Frontend.Controllers;
 
 public class HomeController : Controller
 {
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ILogger<HomeController> _logger;
 
-    // Inject IHttpClientFactory through constructor
-    public HomeController(IHttpClientFactory httpClientFactory)
+    public HomeController(IHttpClientFactory httpClientFactory, ILogger<HomeController> logger)
     {
         _httpClientFactory = httpClientFactory;
+        _logger = logger;
     }
 
     public async Task<IActionResult> Index()
@@ -22,28 +86,26 @@ public class HomeController : Controller
         try
         {
             var client = _httpClientFactory.CreateClient("API");
-            client.Timeout = TimeSpan.FromSeconds(30); // Set timeout
+            client.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/json"));
 
             var response = await client.GetAsync("dashboard/stats");
 
-            response.EnsureSuccessStatusCode(); // Throws if not 200-299
+            if (response.IsSuccessStatusCode)
+            {
+                var model = await response.Content.ReadFromJsonAsync<DashboardViewModel>();
+                return View(model);
+            }
 
-            var model = await response.Content.ReadFromJsonAsync<DashboardViewModel>();
-            return View(model);
+            _logger.LogWarning("API returned {StatusCode}, falling back to empty view",
+                response.StatusCode);
         }
-        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+        catch (Exception ex)
         {
-            return NotFound();
+            _logger.LogError(ex, "Failed to load dashboard data");
         }
-        catch (HttpRequestException ex)
-        {
-            // Log error (e.g., using ILogger)
-            return StatusCode(StatusCodes.Status503ServiceUnavailable);
-        }
-        catch (TaskCanceledException ex) when (!ex.CancellationToken.IsCancellationRequested)
-        {
-            // Handle timeout
-            return StatusCode(StatusCodes.Status504GatewayTimeout);
-        }
+
+        // Fallback to empty view if API fails
+        return View("~/Views/Home/Index.cshtml", new DashboardViewModel());
     }
 }

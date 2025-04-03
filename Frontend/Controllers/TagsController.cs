@@ -2,6 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using SCADA.Frontend.ViewModels;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace SCADA.Frontend.Controllers;
 
@@ -10,28 +15,48 @@ public class TagsController : Controller
 {
     private readonly IHttpClientFactory _httpClient;
     private readonly IConfiguration _config;
+    private readonly ILogger<TagsController> _logger;
 
-    public TagsController(IHttpClientFactory httpClient, IConfiguration config)
+    public TagsController(IHttpClientFactory httpClient, IConfiguration config, ILogger<TagsController> logger)
     {
         _httpClient = httpClient;
         _config = config;
+        _logger = logger;
     }
 
     // GET: Tags?plcId=5
     public async Task<IActionResult> Index(int? plcId)
     {
         var client = _httpClient.CreateClient("API");
+        
         var url = plcId.HasValue ? $"Tags?plcId={plcId}" : "Tags";
 
-        var response = await client.GetAsync(url);
+        try
+        {
+            var response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
 
-        if (!response.IsSuccessStatusCode)
+            var tags = await response.Content.ReadFromJsonAsync<List<TagViewModel>>();
+            ViewBag.SignalRUrl = _config["SignalRHubUrl"];
+            return View(tags);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "API request failed");
             return View("Error");
+        }
+        //var client = _httpClient.CreateClient("API");
+        //var url = plcId.HasValue ? $"Tags?plcId={plcId}" : "Tags";
 
-        var tags = await response.Content.ReadFromJsonAsync<List<TagViewModel>>();
+        //var response = await client.GetAsync(url);
 
-        ViewBag.SignalRUrl = _config["SignalRHubUrl"];
-        return View(tags);
+        //if (!response.IsSuccessStatusCode)
+        //    return View("Error");
+
+        //var tags = await response.Content.ReadFromJsonAsync<List<TagViewModel>>();
+
+        //ViewBag.SignalRUrl = _config["SignalRHubUrl"];
+        //return View(tags);
     }
 
     // GET: Tags/Monitor/5

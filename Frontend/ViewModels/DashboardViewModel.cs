@@ -3,6 +3,9 @@
 public class DashboardViewModel
 {
     // System Overview
+    public string SystemStatus { get; set; } = "Initializing...";
+    public int ActiveTags { get; set; } = 0;
+
     public int ActivePLCs { get; set; }
     public int TotalTags { get; set; }
     public int ActiveAlarms { get; set; }

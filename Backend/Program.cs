@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+//using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -69,6 +70,13 @@ builder.Services.AddOutputCache(options =>
         policy.Expire(TimeSpan.FromMinutes(5)));
 });
 
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowFrontend", builder =>
+        builder.WithOrigins("http://localhost:5257")  // Frontend's HTTP port
+               .AllowAnyMethod()
+               .AllowAnyHeader());
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -90,6 +98,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapHub<TagHub>("/tagHub");

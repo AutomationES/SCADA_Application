@@ -17,7 +17,7 @@ namespace SCADA.Database.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.3")
+                .HasAnnotation("ProductVersion", "8.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -355,13 +355,11 @@ namespace SCADA.Database.Migrations
 
             modelBuilder.Entity("SCADA.Common.Models.Tag", b =>
                 {
-                    b.HasOne("SCADA.Common.Models.PLC", "PLC")
+                    b.HasOne("SCADA.Common.Models.PLC", null)
                         .WithMany("Tags")
                         .HasForeignKey("PlcId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("PLC");
                 });
 
             modelBuilder.Entity("SCADA.Common.Models.PLC", b =>

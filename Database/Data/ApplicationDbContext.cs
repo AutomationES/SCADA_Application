@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SCADA.Common.Models;
+using Microsoft.AspNetCore.Identity; // Add this
 
 namespace SCADA.Database.Data;
 
-public class ApplicationDbContext : IdentityDbContext
+// Specify IdentityUser and IdentityRole explicitly
+public class ApplicationDbContext : IdentityDbContext<IdentityUser, IdentityRole, string>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
@@ -16,9 +18,9 @@ public class ApplicationDbContext : IdentityDbContext
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(builder);
-        
-        // Configure PLC entity
+        base.OnModelCreating(builder); // This is crucial for Identity
+
+        // Your existing configurations
         builder.Entity<PLC>(entity =>
         {
             entity.HasKey(p => p.Id);
@@ -31,7 +33,6 @@ public class ApplicationDbContext : IdentityDbContext
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Configure Tag entity
         builder.Entity<Tag>(entity =>
         {
             entity.HasKey(t => t.Id);
